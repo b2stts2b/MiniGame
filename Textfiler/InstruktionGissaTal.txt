@@ -1,0 +1,4 @@
+I spelet Gissa Tal slumpar datorn ett tal mellan 1 och 1.000.000.
+Ditt mål är att gissa rätt tal.
+Efter varje gissning säger datorn om det var för lågt eller för högt.
+Gissa så få gånger som möjligt för att komma in på topplistan.
