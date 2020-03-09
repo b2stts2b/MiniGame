@@ -1,0 +1,20 @@
+Vad? - Flera minispel med highscores. Grunden är i kommandotolken med vissa delar i grafisk miljö (pygame).
+
+
+
+Kravspecifikation: 
+      0. Highscore - Gemensamt för alla minispel
+	- Kunna hämta och hantera text från fil, t.ex. Hämta highscore och skriva ut på skärmen. 
+	- Om nytt highscore uppnås ska detta uppdateras i textfilen.
+      1. Gissa tal - Första minispelet
+	- Ett tal mellan 1 och 1 miljon ska slumpas.
+	- Skriv ifall input från spelaren är större eller mindre än det valda talet. 
+	- Input som “2”, “detta är en string” och tal utanför slumpspannet ska tas hand om på lämpligt sätt.
+	- Om spelaren gissar rätt på rekordfå försök ska namn läggas till i highscoreListan. 
+      2. Space Invaders - Andra minispelet
+	- Grafiska miljön ska startas upp (pygame).
+	- Ett spelarobjekt ska flyttas i sidled, konstant y-läge.
+	- Spelaren ska kunna skjuta men inte hur snabbt som helst.
+	- Fiendeobjekt ska spawna och långsamt flyga mot spelarens sida.
+	- Om ett skott träffar fiende ska båda förstöras. Poäng++.
+	- Om spelaren träffas av fiende eller om fiende tar sig över till andra sidan har spelaren förlorat. Se 0.b.
