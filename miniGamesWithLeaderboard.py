@@ -4,6 +4,46 @@ import sys
 filMapp = os.getcwd()
 textMap = f"{filMapp}\\Textfiler"
 
+#Skriver ut topplistan i cmd
+def printLeaderBoard(scores):
+	i = 0
+	for player in scores:
+		i += 1
+		nameAndScore = player.split(",")
+		print(f"{i}. {nameAndScore[0]}, {nameAndScore[1]}")
+
+#Läser av en textfil och ger tillbaka en lista av highscore
+def readLeaderBoard(filePath):
+	highScore = []
+	with open(f"{textMap}\\{filePath}") as f:
+		data = f.read()
+		spelare = data.split("\n")
+		for spel in spelare:
+			highScore.append(spel)
+	return highScore
+		
+#Updaterar textfilen med nya highscore	
+def uploadLeaderBoard(scores, filePath):
+	with open(f"{textMap}\\{filePath}", "w") as f:
+		for player in scores:
+			f.write(f"{player}\n")
+
+#Har spelaren fått ett highscore?
+def isHighScore(scores, number):
+	lowestScore = int(scores[-1].split(",")[1])
+	return (number > lowestScore)
+
+#Uppdatera highscore-listan
+def updateHighScore(scores, name, number):
+	nameAndScore = f"{name},{number}"
+	for i in range(len(scores)-1, -1, -1):
+		score = int(scores[i].split(",")[1])
+		if number <= score:
+			for k in range(len(scores)-1, i + 2, -1):
+				scores[k] = scores[k-1]
+			scores[i+1] = nameAndScore
+			break
+
 def GissaTal():
 	pass
 
@@ -14,14 +54,28 @@ def Survival():
 	pass
 
 def LeaderBoardGissaTal():
-	pass
+	os.system("cls")
+	print("LeaderBoard Gissa Tal")
+	print("*************************")
+	highScore = readLeaderBoard("leaderBoardGissaTal.txt")
+	printLeaderBoard(highScore)
+	print("*************************")
 
 def LeaderBoardSpaceInvaders():
-	pass
+	os.system("cls")
+	print("LeaderBoard Space Invaders")
+	print("*************************")
+	highScore = readLeaderBoard("leaderBoardSpaceInvaders.txt")
+	printLeaderBoard(highScore)
+	print("*************************")
 
-def LeaderBoardSpaceInvaders():
-	pass
-
+def LeaderBoardSurvival():
+	os.system("cls")
+	print("LeaderBoard Survival")
+	print("*************************")
+	highScore = readLeaderBoard("leaderBoardSurvival.txt")
+	printLeaderBoard(highScore)
+	print("*************************")
 
 def Spela():
 	svar = ""
@@ -51,11 +105,11 @@ def LeaderBoard():
 		svar = input("Svar: ")
 
 	if svar == "1":
-		pass
+		LeaderBoardGissaTal()
 	elif svar == "2":
-		pass
+		LeaderBoardSpaceInvaders()
 	elif svar == "3":
-		pass
+		LeaderBoardSurvival()
 
 	input("Enter...")
 
@@ -81,8 +135,6 @@ def Instruktion():
 			print(f.read())
 
 	input("Enter...")
-
-
 
 
 while True:
