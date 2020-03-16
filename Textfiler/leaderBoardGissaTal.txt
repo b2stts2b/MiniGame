@@ -1,10 +1,10 @@
+Alicethihi,21
+Axel,21
+Tomas Nilsson,21
+Vendela,22
+Anna,24
+Axel,25
 AAA,999
 BBB,999
 CCC,999
 DDD,999
-EEE,999
-FFF,999
-GGG,999
-HHH,999
-III,999
-JJJ,999

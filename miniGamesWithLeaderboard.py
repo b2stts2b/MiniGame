@@ -1,9 +1,45 @@
 import os
 import sys
 import random
+import pygame
+from time import time
 
 filMapp = os.getcwd()
 textMap = f"{filMapp}\\Textfiler"
+imageMap = f"{filMapp}\\Images"
+filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardSurvival.txt"]
+
+#Nollställer topplistan
+def resetLeaderBoard(highIsGood, filePath):
+	highScore = []
+	if highIsGood:
+		highScore = ["AAA,0","BBB,0","CCC,0","DDD,0","EEE,0","FFF,0","GGG,0","HHH,0","III,0","JJJ,0"]
+	else:
+		highScore = ["AAA,999","BBB,999","CCC,999","DDD,999","EEE,999","FFF,999","GGG,999","HHH,999","III,999","JJJ,999"]
+	with open(f"{textMap}\\{filePath}", "w") as f:
+		for i in range(len(highScore)):
+			if i == len(highScore)-1:
+				f.write(f"{highScore[i]}")
+			else:
+				f.write(f"{highScore[i]}\n")
+
+#Nollställer topplistan
+def ResetLeaderBoardOptions():
+	svar = ""
+	while svar not in ["1","2","3"]:
+		os.system("cls")
+		print("Vilket spels topplista ska ställas om?")
+		print("1. Gissa tal.")
+		print("2. Space Invaders.")
+		print("3. Survival.")
+		svar = input("Svar: ")
+
+	if svar == "1":
+		resetLeaderBoard(False, filePaths[0])
+	elif svar == "2":
+		resetLeaderBoard(True, filePaths[1])
+	elif svar == "3":
+		resetLeaderBoard(True, filePaths[2])
 
 #Skriver ut topplistan i cmd
 def printLeaderBoard(scores):
@@ -79,17 +115,20 @@ def updateHighScore(scores, name, number, highIsGood):
 					break
 	return scores
 
+#GissaTal spelet
 def GissaTal():
 	os.system("cls")
 
-	rättTal = random.randint(1,1000000)
-	print(f"Jag tänker på ett tal mellan 1 och 1 miljon.({rättTal})")
-	
+	lowestPossible = 1
+	highestPossible = 1000000
+	rättTal = random.randint(lowestPossible,highestPossible)
+
 	rättSvar = False
 	antalGissningar = 0
-	highScore = readLeaderBoard("leaderBoardGissaTal.txt")
+	highScore = readLeaderBoard(filePaths[0])
 
 	while not rättSvar:
+		print(f"Jag tänker på ett tal mellan {lowestPossible} och {highestPossible}")
 		try:
 			svar = int(input("Gissa talet: "))
 			antalGissningar += 1
@@ -101,46 +140,106 @@ def GissaTal():
 					print("Det är ett nytt highScore!")
 					name = input("Ditt namn: ")
 					highScore = updateHighScore(highScore, name, antalGissningar, False)
-					uploadLeaderBoard(highScore, "leaderBoardGissaTal.txt")
+					uploadLeaderBoard(highScore, filePaths[0])
 				else:
 					print("Du slo")
 
 				break
 			elif svar < rättTal:
 				print("För lågt!")
+				if svar > lowestPossible:
+					lowestPossible = svar
 			else:
 				print("För högt!")
+				if svar < highestPossible:
+					highestPossible = svar
 		except ValueError:
 			print("Du kan bara gissa heltal, försök igen.")
+		print()
 
-
+#SpaceInvaders spelet 
 def SpaceInvaders():
-	pass
+	
+
+	class Bullet:
+		def __init__(self, x, y, img):
+			self.r = img.get_rect()
+			self.rect = pygame.Rect(x, y, self.r.width, self.r.height)
+			self.img = img
+			self.speed = 5
+
+		def move(self):
+			self.rect.y -= self.speed
+
+
+
+	pygame.init()
+
+	screen_width = 500
+	screen_height = 600
+	screen = pygame.display.set_mode((screen_width, screen_height))
+	pygame.display.set_caption("Space Invaders")
+
+	image = pygame.image.load(f"{imageMap}\\PlayerShip.png")
+	player_image = pygame.transform.scale(image, (70, 60))
+	player_pos = player_image.get_rect()
+	player_pos.y = screen_height - player_pos.height - 10
+
+	image = pygame.image.load(f"{imageMap}\\bullet.png")
+	bullet_image = image.copy()
+	bullet_pos = bullet_image.get_rect()
+	bullets = []
+
+	secPerShot = 0.5
+	shootingTimer = 0
+
+	frameRate = 60
+
+	run = True
+	while run:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				run = False
+
+		key = pygame.key.get_pressed()
+		if key[pygame.K_RIGHT]:
+			player_pos.x += 5
+		if key[pygame.K_LEFT]:
+			player_pos.x -= 5
+		if key[pygame.K_SPACE] and shootingTimer > secPerShot:
+			shootingTimer = 0
+			bullet_pos.bottomleft = player_pos.midtop
+			bullets.append(Bullet(bullet_pos.x, bullet_pos.y, bullet_image))
+
+		t1 = time()
+
+		if player_pos.x < 0:
+			player_pos.x = 0
+		elif player_pos.x > screen_width-player_pos.width:
+			player_pos.x = screen_width-player_pos.width
+
+		screen.fill((0,0,0))
+		for bullet in bullets:
+			bullet.move()
+			screen.blit(bullet.img, bullet.rect)
+
+		screen.blit(player_image, player_pos)
+		pygame.display.update()
+
+
+		pygame.time.delay(1000//frameRate)
+		t2 = time()
+		shootingTimer += t2-t1
+	pygame.quit()
 
 def Survival():
 	pass
 
-def LeaderBoardGissaTal():
+def LeaderBoards(game, filePath):
 	os.system("cls")
-	print("LeaderBoard Gissa Tal")
+	print(f"LeaderBoard {game}")
 	print("*************************")
-	highScore = readLeaderBoard("leaderBoardGissaTal.txt")
-	printLeaderBoard(highScore)
-	print("*************************")
-
-def LeaderBoardSpaceInvaders():
-	os.system("cls")
-	print("LeaderBoard Space Invaders")
-	print("*************************")
-	highScore = readLeaderBoard("leaderBoardSpaceInvaders.txt")
-	printLeaderBoard(highScore)
-	print("*************************")
-
-def LeaderBoardSurvival():
-	os.system("cls")
-	print("LeaderBoard Survival")
-	print("*************************")
-	highScore = readLeaderBoard("leaderBoardSurvival.txt")
+	highScore = readLeaderBoard(filePath)
 	printLeaderBoard(highScore)
 	print("*************************")
 
@@ -172,11 +271,11 @@ def LeaderBoard():
 		svar = input("Svar: ")
 
 	if svar == "1":
-		LeaderBoardGissaTal()
+		LeaderBoards("Gissa Tal", filePaths[0])
 	elif svar == "2":
-		LeaderBoardSpaceInvaders()
+		LeaderBoards("Space Invaders", filePaths[1])
 	elif svar == "3":
-		LeaderBoardSurvival()
+		LeaderBoards("Survival", filePaths[2])
 
 	try:
 		input("Enter...")
@@ -211,13 +310,14 @@ def Instruktion():
 while True:
 	svar = ""
 	#Fråga efter vad spelaren vill göra
-	while svar not in ["1","2","3","4"]:
+	while svar not in ["1","2","3","4","5"]:
 		os.system("cls")
 		print("Vad vill du göra?")
 		print("1. Spela.")
-		print("2. LeaderBoard.")
-		print("3. Instruktion.")
-		print("4. Avsluta.")
+		print("2. Kolla LeaderBoard.")
+		print("3. Reset Leaderboard.")
+		print("4. Instruktion.")
+		print("5. Avsluta.")
 		svar = input("Svar: ")
 
 	#Utför vad spelaren valde
@@ -226,6 +326,8 @@ while True:
 	elif svar == "2":
 		LeaderBoard()
 	elif svar == "3":
-		Instruktion()
+		ResetLeaderBoardOptions()
 	elif svar == "4":
+		Instruktion()
+	elif svar == "5":
 		sys.exit(0)
