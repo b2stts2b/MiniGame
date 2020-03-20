@@ -7,6 +7,7 @@ from time import time
 filMapp = os.getcwd()
 textMap = f"{filMapp}\\Textfiler"
 imageMap = f"{filMapp}\\Images"
+soundMap = f"{filMapp}\\Sounds"
 filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardSurvival.txt"]
 
 #Nollställer topplistan
@@ -25,21 +26,29 @@ def resetLeaderBoard(highIsGood, filePath):
 
 #Nollställer topplistan
 def ResetLeaderBoardOptions():
-	svar = ""
-	while svar not in ["1","2","3"]:
-		os.system("cls")
-		print("Vilket spels topplista ska ställas om?")
-		print("1. Gissa tal.")
-		print("2. Space Invaders.")
-		print("3. Survival.")
-		svar = input("Svar: ")
+	passWord = "axelthunell"
+	svar = input("Lösenord: ")
+	if svar == passWord:
+		svar = ""
+		while svar not in ["1","2","3"]:
+			os.system("cls")
+			print("Vilket spels topplista ska ställas om?")
+			print("1. Gissa tal.")
+			print("2. Space Invaders.")
+			print("3. Survival.")
+			svar = input("Svar: ")
 
-	if svar == "1":
-		resetLeaderBoard(False, filePaths[0])
-	elif svar == "2":
-		resetLeaderBoard(True, filePaths[1])
-	elif svar == "3":
-		resetLeaderBoard(True, filePaths[2])
+		if svar == "1":
+			resetLeaderBoard(False, filePaths[0])
+		elif svar == "2":
+			resetLeaderBoard(True, filePaths[1])
+		elif svar == "3":
+			resetLeaderBoard(True, filePaths[2])
+		else:
+			pass
+	else:
+		print("Fel svar!")
+		input("Enter...")
 
 #Skriver ut topplistan i cmd
 def printLeaderBoard(scores):
@@ -142,7 +151,7 @@ def GissaTal():
 					highScore = updateHighScore(highScore, name, antalGissningar, False)
 					uploadLeaderBoard(highScore, filePaths[0])
 				else:
-					print("Du slo")
+					print("Du kom inte på topplistan.")
 
 				break
 			elif svar < rättTal:
@@ -159,78 +168,252 @@ def GissaTal():
 
 #SpaceInvaders spelet 
 def SpaceInvaders():
-	
+	import pygame, random, sys, os
+	from time import time
 
 	class Bullet:
 		def __init__(self, x, y, img):
 			self.r = img.get_rect()
 			self.rect = pygame.Rect(x, y, self.r.width, self.r.height)
 			self.img = img
-			self.speed = 5
+			self.speed = 7
 
 		def move(self):
 			self.rect.y -= self.speed
 
+		def IsOverTop(self):
+			return (self.rect.y < -self.rect.height)
 
 
+	class Enemy:
+		def __init__(self, x, y, img):
+			self.r = img.get_rect()
+			self.rect = pygame.Rect(x, y, self.r.width, self.r.height)
+			self.img = img
+			self.speed = 3
+
+		def move(self):
+			self.rect.y += self.speed
+
+		def IsOverTop(self):
+			return (self.rect.y > screen_height)
+
+
+	class Player:
+		def __init__(self, x, y, img):
+			self.r = img.get_rect()
+			self.rect = pygame.Rect(x, y, self.r.width, self.r.height)
+			self.img = img
+			self.speed = 5
+			self.secPerShot = 0.5
+			self.shootingTimer = 0
+
+		def moveRight(self):
+			self.rect.x += self.speed
+
+		def moveLeft(self):
+			self.rect.x -= self.speed
+
+
+	class Game:
+		def __init__(self):
+			#Variabler för att spawna fiender
+			self.averageSpawnTime = 1
+			self.spawnTimeSpan = 0.25
+			self.currentSpawnTime = 0
+			self.spawnTimer = 0
+			self.numOfEnemies = 0
+
+				#Variabler för levels
+			self.currentLevel = 0
+			self.newLevel = False
+
+			self.antalPoäng = 0
+
+
+	def collisionCheck(bullet, enemy):
+		b_rect = bullet.rect
+		e_rect = enemy.rect
+
+		if b_rect.left < e_rect.right and b_rect.right > e_rect.left:
+			if b_rect.top < e_rect.bottom and b_rect.bottom > e_rect.top:
+				#Bullet hit enemy
+				return True
+		return False
+
+	def SpawnEnemy():
+
+		x = random.randint(0, screen_width - enemy_rect.width)
+		y = -player.rect.height
+
+		enemies.append(Enemy(x, y, enemy_image))
+		game.numOfEnemies -= 1
+		game.spawnTimer = 0
+		game.currentSpawnTime = random.uniform(game.averageSpawnTime - game.spawnTimeSpan, game.averageSpawnTime + game.spawnTimeSpan)
+
+	def NextLevel():
+		
+		game.currentLevel += 1
+
+		text = levelFont.render(f"level: {game.currentLevel}", False, (0,255,0))
+		text_rect = text.get_rect()
+		text_rect.center = (screen_width//2, screen_height//2)
+		screen.blit(text, text_rect)
+
+		game.numOfEnemies = 5 + game.currentLevel * 5
+		game.averageSpawnTime *= 0.95
+		game.spawnTimeSpan *= 0.95
+		game.newLevel = True
+
+	def ConstrainPlayerPos():
+		if player.rect.x < 0:
+			player.rect.x = 0
+		elif player.rect.x > screen_width-player.rect.width:
+			player.rect.x = screen_width-player.rect.width
+
+	#Initialisera pygame
+	pygame.mixer.pre_init(48000, -16, 1, 1024)
+	pygame.mixer.init()
 	pygame.init()
 
+	#Vairabler för spelet
+	game = Game()
+	frameRate = 60
+
+	#Skärmens information
 	screen_width = 500
-	screen_height = 600
+	screen_height = 700
 	screen = pygame.display.set_mode((screen_width, screen_height))
 	pygame.display.set_caption("Space Invaders")
 
-	image = pygame.image.load(f"{imageMap}\\PlayerShip.png")
-	player_image = pygame.transform.scale(image, (70, 60))
-	player_pos = player_image.get_rect()
-	player_pos.y = screen_height - player_pos.height - 10
+	#Spelarens information
+	image = pygame.image.load(f"{imageMap}\\PlayerShip.png").convert_alpha()
+	rez = image.get_rect().width/image.get_rect().height
+	h = 60
+	w = round(h*rez)
+	player_image = pygame.transform.scale(image, (w, h))
+	player = Player(screen_width//2, screen_height - player_image.get_rect().height - 10, player_image)
 
-	image = pygame.image.load(f"{imageMap}\\bullet.png")
+	#Skottens information
+	image = pygame.image.load(f"{imageMap}\\bullet2.png").convert_alpha()
 	bullet_image = image.copy()
 	bullet_pos = bullet_image.get_rect()
 	bullets = []
 
-	secPerShot = 0.5
-	shootingTimer = 0
+	#Fiendens information
+	image = pygame.image.load(f"{imageMap}\\enemyBlue1.png").convert_alpha()
+	rez = image.get_rect().width/image.get_rect().height
+	h = 50
+	w = round(h*rez)
+	enemy_image = pygame.transform.scale(image, (w, h))
+	enemy_rect = enemy_image.get_rect()
+	enemies = []
 
-	frameRate = 60
+	#Bakgrundens information
+	image = pygame.image.load(f"{imageMap}\\bgImage.jpg").convert()
+	bg_image = pygame.transform.scale(image, (screen_width, screen_height)) 
+
+	#variabler för text 
+	levelFont = pygame.font.Font("freesansbold.ttf", 115)
+	scoreFont = pygame.font.SysFont("arial", 40)
+	scoreText = scoreFont.render(f"Score: {game.antalPoäng}", False, (255,0,0))
+	score_rect = scoreText.get_rect()
+
+	#Variabler för ljud
+	skjut_ljud = pygame.mixer.Sound(f"{soundMap}\\skjuta.wav")
+
+
+	highScore = readLeaderBoard(filePaths[1])
 
 	run = True
 	while run:
+		t1 = time()
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
 
 		key = pygame.key.get_pressed()
 		if key[pygame.K_RIGHT]:
-			player_pos.x += 5
+			player.moveRight()
 		if key[pygame.K_LEFT]:
-			player_pos.x -= 5
-		if key[pygame.K_SPACE] and shootingTimer > secPerShot:
-			shootingTimer = 0
-			bullet_pos.bottomleft = player_pos.midtop
+			player.moveLeft()
+		if key[pygame.K_SPACE] and player.shootingTimer > player.secPerShot:
+			player.shootingTimer = 0
+			bullet_pos.bottomleft = player.rect.midtop
 			bullets.append(Bullet(bullet_pos.x, bullet_pos.y, bullet_image))
+			skjut_ljud.play()
+		
+		#Constrain Players position
+		ConstrainPlayerPos()
+		
+		#Måla bakgrunden
+		screen.blit(bg_image, (0,0))
 
-		t1 = time()
+		#Bullets functionality
+		for i in range(len(bullets)-1, -1, -1):
+			bullets[i].move()
+			screen.blit(bullets[i].img, bullets[i].rect)
+			if bullets[i].IsOverTop():
+				bullets.pop(i)
 
-		if player_pos.x < 0:
-			player_pos.x = 0
-		elif player_pos.x > screen_width-player_pos.width:
-			player_pos.x = screen_width-player_pos.width
+		#Enemy functionality
+		for i in range(len(enemies)-1, -1, -1):
+			enemies[i].move()
+			screen.blit(enemies[i].img, enemies[i].rect)
+			if enemies[i].IsOverTop():
+				enemies.pop(i)
 
-		screen.fill((0,0,0))
-		for bullet in bullets:
-			bullet.move()
-			screen.blit(bullet.img, bullet.rect)
+		#Spawna fiende
+		if game.numOfEnemies > 0 and game.spawnTimer > game.currentSpawnTime:
+			SpawnEnemy()
 
-		screen.blit(player_image, player_pos)
+		#Starta en ny nivå
+		if game.numOfEnemies <= 0 and len(enemies) == 0:
+			NextLevel()
+
+		#Check if bullet hit enemy
+		for i in range(len(enemies)-1, -1, -1):
+			for j in range(len(bullets)-1, -1, -1):
+				hit = collisionCheck(bullets[j], enemies[i])
+				if hit:
+					enemies.pop(i)
+					bullets.pop(j)
+					game.antalPoäng += 1
+					scoreText = scoreFont.render(f"Score: {game.antalPoäng}", False, (255,0,0))
+					break
+
+		#Check if enemy hit player
+		for i in range(len(enemies)-1, -1, -1):
+			hit = collisionCheck(player, enemies[i])
+			if hit:
+				#Vi har förlorat
+				print("Du förlorade")
+				run = False
+
+
+		screen.blit(player.img, player.rect)
+		screen.blit(scoreText, score_rect)
 		pygame.display.update()
 
+		if game.newLevel:
+			pygame.time.delay(1000)
+			game.newLevel = False
 
 		pygame.time.delay(1000//frameRate)
 		t2 = time()
-		shootingTimer += t2-t1
+		player.shootingTimer += t2-t1
+		game.spawnTimer += t2-t1
+
 	pygame.quit()
+	print(f"Du nådde level {game.currentLevel} och fick {game.antalPoäng} poäng.")
+	if isHighScore(highScore, game.antalPoäng, True):
+		print("Det är ett nytt highScore!")
+		name = input("Ditt namn: ")
+		highScore = updateHighScore(highScore, name, game.antalPoäng, True)
+		uploadLeaderBoard(highScore, filePaths[1])
+	else:
+		print("Du kom inte på topplistan.")
+	input("Enter...")
 
 def Survival():
 	pass
