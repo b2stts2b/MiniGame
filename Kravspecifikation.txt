@@ -18,3 +18,5 @@ Kravspecifikation:
 	- Fiendeobjekt ska spawna och långsamt flyga mot spelarens sida.
 	- Om ett skott träffar fiende ska båda förstöras. Poäng++.
 	- Om spelaren träffas av fiende eller om fiende tar sig över till andra sidan har spelaren förlorat. Se 0.b.
+      3. Toilet Paper - Tredje minispelet
+	- 

@@ -8,7 +8,7 @@ filMapp = os.getcwd()
 textMap = f"{filMapp}\\Textfiler"
 imageMap = f"{filMapp}\\Images"
 soundMap = f"{filMapp}\\Sounds"
-filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardSurvival.txt"]
+filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardToiletPaper.txt"]
 
 #Nollställer topplistan
 def resetLeaderBoard(highIsGood, filePath):
@@ -35,7 +35,7 @@ def ResetLeaderBoardOptions():
 			print("Vilket spels topplista ska ställas om?")
 			print("1. Gissa tal.")
 			print("2. Space Invaders.")
-			print("3. Survival.")
+			print("3. ToiletPaper.")
 			svar = input("Svar: ")
 
 		if svar == "1":
@@ -124,7 +124,16 @@ def updateHighScore(scores, name, number, highIsGood):
 					break
 	return scores
 
-#GissaTal spelet
+#Skriv ut topplistan på skärmen
+def LeaderBoards(game, filePath):
+	os.system("cls")
+	print(f"LeaderBoard {game}")
+	print("*************************")
+	highScore = readLeaderBoard(filePath)
+	printLeaderBoard(highScore)
+	print("*************************")
+
+#GissaTal spelet (inte särskrivning)
 def GissaTal():
 	os.system("cls")
 
@@ -261,8 +270,8 @@ def SpaceInvaders():
 		screen.blit(text, text_rect)
 
 		game.numOfEnemies = 5 + game.currentLevel * 5
-		game.averageSpawnTime *= 0.95
-		game.spawnTimeSpan *= 0.95
+		game.averageSpawnTime *= 0.9
+		game.spawnTimeSpan *= 0.9
 		game.newLevel = True
 
 	def ConstrainPlayerPos():
@@ -361,7 +370,7 @@ def SpaceInvaders():
 			enemies[i].move()
 			screen.blit(enemies[i].img, enemies[i].rect)
 			if enemies[i].IsOverTop():
-				enemies.pop(i)
+				enemies[i].rect.bottom = 0
 
 		#Spawna fiende
 		if game.numOfEnemies > 0 and game.spawnTimer > game.currentSpawnTime:
@@ -415,25 +424,167 @@ def SpaceInvaders():
 		print("Du kom inte på topplistan.")
 	input("Enter...")
 
-def Survival():
-	pass
+#Toapapper spelet
+def ToiletPaper():
+	class Hink:
+		def __init__(self, x, y, img):
+			self.img = img
+			self.rect = pygame.Rect(x, y, self.img.get_rect().width, self.img.get_rect().height)
+			self.rect.h = 20
+			self.index = 0
 
-def LeaderBoards(game, filePath):
-	os.system("cls")
-	print(f"LeaderBoard {game}")
-	print("*************************")
-	highScore = readLeaderBoard(filePath)
-	printLeaderBoard(highScore)
-	print("*************************")
+		def updatePos(self):
+			self.index = self.index % 3
+			self.rect.centerx = pos[self.index]
+
+		def draw(self):
+			screen.blit(self.img, self.rect)
+			
+		def Catch(self, rulle):
+			h_rect = self.rect
+			r_rect = rulle.rect
+
+			if h_rect.left < r_rect.centerx and h_rect.right > r_rect.centerx:
+				if h_rect.top < r_rect.bottom and h_rect.bottom > r_rect.bottom:
+					#Fångade toarullen
+					return True
+			return False
+
+	class Rulle:
+		def __init__(self, x, img, speed):
+			self.img = img
+			h = self.img.get_rect().height
+			w = self.img.get_rect().width
+			self.rect = pygame.Rect(x - h//2, -h, w, h)
+			self.speed = speed
+
+		def updatePos(self):
+			self.rect.y += self.speed
+
+		def draw(self):
+			screen.blit(self.img, self.rect)
+
+		def isOnBottom(self):
+			return (self.rect.bottom > screen_height)
+
+	class Game:
+		def __init__(self):
+			self.poäng = 0
+			self.resetTime = 1
+			self.timer = 0
+			self.speed = 5
+
+		def spawnRulle(self):
+			i = random.randint(0,2)
+			speed = 5 + round(self.poäng/20)
+
+			rullar.append(Rulle(pos[i], rulle_image, speed))
+			
+			self.timer = 0
+			self.resetTime *= 0.992
+
+
+
+	pygame.init()
+
+	#Skärmen
+	screen_width = 500
+	screen_height = 600
+	screen = pygame.display.set_mode((screen_width, screen_height), depth = 32)
+
+	#Position i x-led
+	inc = screen_width//16
+	pos = [3*inc, 8*inc, 13*inc]
+
+	#Key för pilarna
+	ARROWS = [276, 275]
+
+	#Spelaren
+	w = 100
+	h = 100
+	bucket_image = pygame.image.load(f"{imageMap}\\bucket.png").convert_alpha()
+	bucket_image = pygame.transform.scale(bucket_image, (w, h))
+	hink = Hink(screen_width//2, screen_height - h - 10, bucket_image)
+	hink.rect.centerx = pos[hink.index]
+
+	#Rullarna
+	w, h = 60, 60
+	rulle_image = pygame.image.load(f"{imageMap}\\rulle.png").convert_alpha()
+	rulle_image = pygame.transform.scale(rulle_image, (w, h))
+	rullar = []
+
+	#Spelvariabler
+	frameRate = 60
+	game = Game()
+	highScore = readLeaderBoard(filePaths[2])
+
+	#Textvariabler
+	scoreFont = pygame.font.SysFont("couriernew", 40)
+
+	run = True
+	while run:
+		t1 = time()
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				run = False
+			if event.type == pygame.KEYDOWN:
+				if event.key == ARROWS[0]:
+					hink.index -= 1
+					hink.updatePos()
+				elif event.key == ARROWS[1]:
+					hink.index += 1
+					hink.updatePos()
+		
+		#UppdateraText
+		scoreText = scoreFont.render(f"Score: {game.poäng}", False, (50,200,0))
+		score_rect = scoreText.get_rect()
+
+		#Rita på skärmen	
+		screen.fill((50,0,0))
+		screen.blit(scoreText, score_rect)
+		hink.draw()
+
+		#Funktion för spelet
+		if game.timer >= game.resetTime:
+			game.spawnRulle()
+
+		#Funtion för rullar
+		for i in range(len(rullar)-1, -1, -1):
+			rulle = rullar[i]
+			if rulle.isOnBottom():
+				rullar.pop(i)
+				run = False
+			elif hink.Catch(rulle):
+				rullar.pop(i)
+				game.poäng += 1
+			rulle.updatePos()
+			rulle.draw()
+
+
+		pygame.display.update()
+		pygame.time.delay(1000//frameRate)
+		t2 = time()
+		game.timer += (t2-t1)
+	pygame.quit()
+	print(f"Du fick {game.poäng} poäng.")
+	if isHighScore(highScore, game.poäng, True):
+		print("Det är ett nytt highScore!")
+		name = input("Ditt namn: ")
+		highScore = updateHighScore(highScore, name, game.poäng, True)
+		uploadLeaderBoard(highScore, filePaths[2])
+	else:
+		print("Du kom inte på topplistan.")
+	input("Enter...")
 
 def Spela():
 	svar = ""
-	while svar not in ["1","2","3"]:
+	while svar not in ["1","2","3","4"]:
 		os.system("cls")
 		print("Vilket spel vill du spela?")
 		print("1. Gissa tal.")
 		print("2. Space Invaders.")
-		print("3. Survival.")
+		print("3. ToiletPaper.")
+		print("4. Tillbaka.")
 		svar = input("Svar: ")
 
 	if svar == "1":
@@ -441,52 +592,60 @@ def Spela():
 	elif svar == "2":
 		SpaceInvaders()
 	elif svar == "3":
-		Survival()
+		ToiletPaper()
+	elif svar == "4":
+		pass
 
 def LeaderBoard():
 	svar = ""
-	while svar not in ["1","2","3"]:
+	while svar not in ["1","2","3","4"]:
 		os.system("cls")
 		print("Vilket spel vill du se Highscore från?")
 		print("1. Gissa Tal.")
 		print("2. SpaceInvaders.")
-		print("3. Survival.")
+		print("3. ToiletPaper.")
+		print("4. Tillbaka.")
 		svar = input("Svar: ")
 
 	if svar == "1":
 		LeaderBoards("Gissa Tal", filePaths[0])
+		input("Enter...")
 	elif svar == "2":
 		LeaderBoards("Space Invaders", filePaths[1])
-	elif svar == "3":
-		LeaderBoards("Survival", filePaths[2])
-
-	try:
 		input("Enter...")
-	except:
+	elif svar == "3":
+		LeaderBoards("ToiletPaper", filePaths[2])
+		input("Enter...")
+	elif svar == "4":
 		pass
 
 def Instruktion():
 	svar = ""
-	while svar not in ["1","2","3"]:
+	while svar not in ["1","2","3","4"]:
 		os.system("cls")
 		print("Vilket spel vill du lära dig?")
 		print("1. Gissa Tal.")
 		print("2. SpaceInvaders.")
-		print("3. Survival.")
+		print("3. ToiletPaper.")
+		print("4. Tillbaka.")
 		svar = input("Svar: ")
 
 	os.system("cls")
 	if svar == "1":
 		with open(f"{textMap}\\InstruktionGissaTal.txt") as f:
 			print(f.read())
+		input("Enter...")
 	elif svar == "2":
 		with open(f"{textMap}\\InstruktionSpaceInvaders.txt") as f:
 			print(f.read())
+		input("Enter...")
 	elif svar == "3":
-		with open(f"{textMap}\\InstruktionSurvival.txt") as f:
+		with open(f"{textMap}\\InstruktionToiletPaper.txt") as f:
 			print(f.read())
+		input("Enter...")
+	elif svar == 4:
+		pass
 
-	input("Enter...")
 
 
 #Här börjar applikationen
