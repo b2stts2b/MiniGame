@@ -17,6 +17,10 @@ Kravspecifikation:
 	- Spelaren ska kunna skjuta men inte hur snabbt som helst.
 	- Fiendeobjekt ska spawna och långsamt flyga mot spelarens sida.
 	- Om ett skott träffar fiende ska båda förstöras. Poäng++.
-	- Om spelaren träffas av fiende eller om fiende tar sig över till andra sidan har spelaren förlorat. Se 0.b.
+	- Om spelaren träffas av fiende har spelaren förlorat. Se 0.b.
+	- Om fienden tar sig över till andra sidan minskar HP.
       3. Toilet Paper - Tredje minispelet
-	- 
+	- Flytta hink.
+	- Spawna rullar med accelererande fart och tid.
+	- räkna poäng för varje fångad rulle --> highscore
+	- förlora om rullen når botten.

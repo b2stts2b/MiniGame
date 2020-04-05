@@ -216,6 +216,7 @@ def SpaceInvaders():
 			self.speed = 5
 			self.secPerShot = 0.5
 			self.shootingTimer = 0
+			self.health = 3
 
 		def moveRight(self):
 			self.rect.x += self.speed
@@ -223,6 +224,33 @@ def SpaceInvaders():
 		def moveLeft(self):
 			self.rect.x -= self.speed
 
+		def getPowerUp(self, index):
+			if index == 0:
+				self.health += 1
+			elif index == 1:
+				self.speed += 1
+			elif index == 2:
+				self.secPerShot *= 0.95
+
+	class Pow:
+		def __init__(self, center, images):
+			possibilities = []
+			if player.health != 5:
+				possibilities.append(0)
+			if player.speed != 10:
+				possibilities.append(1)
+			possibilities.append(2)
+			self.index = random.choice(possibilities)
+			self.img = images[self.index]
+			self.rect = self.img.get_rect()
+			self.rect.center = center
+			self.speed = 3
+
+		def move(self):
+			self.rect.y += self.speed
+
+		def isOverTop(self):
+			return (self.rect.y > screen_height)
 
 	class Game:
 		def __init__(self):
@@ -297,6 +325,10 @@ def SpaceInvaders():
 
 	#Spelarens information
 	image = pygame.image.load(f"{imageMap}\\PlayerShip.png").convert_alpha()
+	heart_image = pygame.image.load(f"{imageMap}\\heart.png").convert_alpha()
+	heart_image = pygame.transform.scale(heart_image, (40,40))
+	heart_rect = heart_image.get_rect()
+	heart_rect.right = screen_width
 	rez = image.get_rect().width/image.get_rect().height
 	h = 60
 	w = round(h*rez)
@@ -308,6 +340,15 @@ def SpaceInvaders():
 	bullet_image = image.copy()
 	bullet_pos = bullet_image.get_rect()
 	bullets = []
+
+	#PowerUp Information
+	health_image = pygame.image.load(f"{imageMap}\\health.png").convert_alpha()
+	speed_image = pygame.image.load(f"{imageMap}\\speed.png").convert_alpha()
+	moveSpeed_image = pygame.image.load(f"{imageMap}\\moveSpeed.png").convert_alpha()
+	powerUpImages = [health_image, moveSpeed_image, speed_image]
+	chanceToSpawn = 0.1
+	powerUps = []
+
 
 	#Fiendens information
 	image = pygame.image.load(f"{imageMap}\\enemyBlue1.png").convert_alpha()
@@ -330,6 +371,7 @@ def SpaceInvaders():
 
 	#Variabler för ljud
 	skjut_ljud = pygame.mixer.Sound(f"{soundMap}\\skjuta.wav")
+	skjut_ljud.set_volume(0.2)
 
 
 	highScore = readLeaderBoard(filePaths[1])
@@ -371,6 +413,17 @@ def SpaceInvaders():
 			screen.blit(enemies[i].img, enemies[i].rect)
 			if enemies[i].IsOverTop():
 				enemies[i].rect.bottom = 0
+				player.health -= 1
+				if player.health <= 0:
+					run = False
+
+
+		#PowerUp functionality
+		for i in range(len(powerUps)-1, -1, -1):
+			powerUps[i].move()
+			screen.blit(powerUps[i].img, powerUps[i].rect)
+			if powerUps[i].isOverTop():
+				powerUps.pop(i)
 
 		#Spawna fiende
 		if game.numOfEnemies > 0 and game.spawnTimer > game.currentSpawnTime:
@@ -385,6 +438,9 @@ def SpaceInvaders():
 			for j in range(len(bullets)-1, -1, -1):
 				hit = collisionCheck(bullets[j], enemies[i])
 				if hit:
+					spawnChance = random.random()
+					if spawnChance < chanceToSpawn:
+						powerUps.append(Pow(enemies[i].rect.center, powerUpImages))
 					enemies.pop(i)
 					bullets.pop(j)
 					game.antalPoäng += 1
@@ -399,9 +455,18 @@ def SpaceInvaders():
 				print("Du förlorade")
 				run = False
 
+		#Check if powerUp hit player
+		for i in range(len(powerUps)-1, -1, -1):
+			hit = collisionCheck(player, powerUps[i])
+			if hit:
+				player.getPowerUp(powerUps[i].index)
+				powerUps.pop(i)
+
 
 		screen.blit(player.img, player.rect)
 		screen.blit(scoreText, score_rect)
+		for heart in range(0,player.health):
+			screen.blit(heart_image, pygame.Rect(heart_rect.x-heart*heart_rect.width, heart_rect.y, heart_rect.w, heart_rect.h))
 		pygame.display.update()
 
 		if game.newLevel:
