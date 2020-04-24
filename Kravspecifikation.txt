@@ -24,3 +24,16 @@ Kravspecifikation:
 	- Spawna rullar med accelererande fart och tid.
 	- räkna poäng för varje fångad rulle --> highscore
 	- förlora om rullen når botten.
+      4. [Lägg till namn i framtiden] - fjärde och sista spelet
+	***Programmerar grunden i spelet i en fil som inte ligger I Github.***
+	- Styr ett skepp i alla riktningar
+	- Skjuta skott mot musens position
+	- RymdKänsla när det gäller styrning av skeppet.
+	- Spawna fiender.
+	- Kollisioner.
+	***Att göra***	
+	- Spawna powerups.
+	- Sätta gräns på skott/sekund. 
+	- Spawna fiender (random? x sekunder per fiende) runt planen
+	- Ändra hitbox?
+	- Statistik (Matplotlib?)
