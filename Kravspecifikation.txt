@@ -31,9 +31,10 @@ Kravspecifikation:
 	- RymdKänsla när det gäller styrning av skeppet.
 	- Spawna fiender.
 	- Kollisioner.
-	***Att göra***	
-	- Spawna powerups.
-	- Sätta gräns på skott/sekund. 
-	- Spawna fiender (random? x sekunder per fiende) runt planen
-	- Ändra hitbox?
+	- Sätta gräns på skott/sekund.
+	- Spawna fiender random runt planen.
+	***Att göra***	 
+	- Shop?
+	- Olika mycket HP på virus?
+      5. Statistik? (MatPlotLib)
 	- Statistik (Matplotlib?)
