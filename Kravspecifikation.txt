@@ -33,8 +33,8 @@ Kravspecifikation:
 	- Kollisioner.
 	- Sätta gräns på skott/sekund.
 	- Spawna fiender random runt planen.
-	***Att göra***	 
-	- Shop?
+	- Chans för kortare tid mellan skott vid kill.
+	***Att göra***
 	- Olika mycket HP på virus?
       5. Statistik? (MatPlotLib)
 	- Statistik (Matplotlib?)
