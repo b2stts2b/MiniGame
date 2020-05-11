@@ -34,7 +34,6 @@ Kravspecifikation:
 	- Sätta gräns på skott/sekund.
 	- Spawna fiender random runt planen.
 	- Chans för kortare tid mellan skott vid kill.
-	***Att göra***
-	- Olika mycket HP på virus?
+	- Olika mycket HP på virus!!!
       5. Statistik? (MatPlotLib)
 	- Statistik (Matplotlib?)

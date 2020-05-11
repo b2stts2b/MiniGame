@@ -1,5 +1,10 @@
-I Space Invaders ska du skjuta ner alla fiendeskepp innan de når till andra sidan. 
+I Space Invaders ska du skjuta ner alla fiendeskepp innan de når till andra sidan.
 Om du klarar dig tillräckligt länge kommer du till nästa nivå!
 
 Du styr med höger/vänster piltangent.
 Du skjuter med SPACE.
+
+PowerUps:
+- Extra liv.
+- Ökad hastighet.
+- Ökad skjuthastighet.

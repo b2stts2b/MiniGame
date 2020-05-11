@@ -10,6 +10,15 @@ textMap = f"{filMapp}\\Textfiler"
 imageMap = f"{filMapp}\\Images"
 soundMap = f"{filMapp}\\Sounds"
 filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardToiletPaper.txt", "leaderBoardCorona.txt"]
+passWord = ""
+
+
+#Läs in lösenord för återställning
+def ReadPassword():
+	pWord = ""
+	with open(f"{textMap}\\password.txt") as f:
+		pWord = f.read().replace(" ", "").replace("lösenord:", "")
+	return pWord
 
 #Nollställer topplistan
 def resetLeaderBoard(highIsGood, filePath):
@@ -26,8 +35,7 @@ def resetLeaderBoard(highIsGood, filePath):
 				f.write(f"{highScore[i]}\n")
 
 #Nollställer topplistan
-def ResetLeaderBoardOptions():
-	passWord = "axelthunell"
+def ResetLeaderBoardOptions(passWord):
 	svar = input("Lösenord: ")
 	if svar == passWord:
 		svar = ""
@@ -758,17 +766,21 @@ def Corona():
 
 	#Enemy Class
 	class Enemy:
-		def __init__(self, x, y, img):
+		def __init__(self, x, y, img, speed, hp):
 			self.x = x
 			self.y = y
 			self.img = img
+
 			rect = img.get_rect()
 			self.rect = rect
 			self.rect.x = x
 			self.rect.y = y
 			self.pos = [x, y]
-			self.speed = 4
+			
+			self.speed = speed
+			self.hp = hp
 
+		#Flyttar fienden
 		def Move(self, pos):
 			dX = pos[0] - self.rect.x
 			dY = pos[1] - self.rect.y
@@ -782,30 +794,57 @@ def Corona():
 			self.rect.x = round(self.pos[0])
 			self.rect.y = round(self.pos[1])
 
+		#Tar skada
+		def Hit(self):
+			self.hp -= 1
+
 	#Spawner Class
 	class Spawner:
-		def __init__(self, enemyImage):
+		def __init__(self, enemyImage, bossImage):
 			self.enemySize = 50
+			self.bossSize = 75
 			self.enemyImage = pygame.transform.scale(enemyImage, (self.enemySize, self.enemySize))
+			self.bossImage = pygame.transform.scale(bossImage, (self.bossSize, self.bossSize))
+
 			self.enemies = []
+			self.normalSpeed = 4
+			self.bossSpeed = 2
+			self.bossHealth = 2
+			self.normalHealth = 1
+			self.normalChance = 0.95
 
 			self.spawnTime = 1.5
 			self.spawnTimer = 0
+
 
 		def SpawnEnemy(self):
 			xOrY = random.choice(["X", "Y"])
 			side = random.choice([0, screen_width])
 			dist = random.randint(0, screen_width)
-			if xOrY == "X":
-				if side == 0:
-					self.enemies.append(Enemy(-self.enemySize, random.randint(0, screen_width), self.enemyImage))
+			typeOfEnemy = random.random()
+			
+			if typeOfEnemy > self.normalChance:
+				if xOrY == "X":
+					if side == 0:
+						self.enemies.append(Enemy(-self.enemySize, random.randint(0, screen_width), self.bossImage, self.bossSpeed, self.bossHealth))
+					else:
+						self.enemies.append(Enemy(side, random.randint(0, screen_width), self.bossImage, self.bossSpeed, self.bossHealth))
 				else:
-					self.enemies.append(Enemy(side, random.randint(0, screen_width), self.enemyImage))
+					if side == 0:
+						self.enemies.append(Enemy(random.randint(0, screen_width), -self.enemySize, self.bossImage, self.bossSpeed, self.bossHealth))
+					else:
+						self.enemies.append(Enemy(random.randint(0, screen_width), side, self.bossImage, self.bossSpeed, self.bossHealth))
 			else:
-				if side == 0:
-					self.enemies.append(Enemy(random.randint(0, screen_width), -self.enemySize, self.enemyImage))
+				if xOrY == "X":
+					if side == 0:
+						self.enemies.append(Enemy(-self.enemySize, random.randint(0, screen_width), self.enemyImage, self.normalSpeed, self.normalHealth))
+					else:
+						self.enemies.append(Enemy(side, random.randint(0, screen_width), self.enemyImage, self.normalSpeed, self.normalHealth))
 				else:
-					self.enemies.append(Enemy(random.randint(0, screen_width), side, self.enemyImage))
+					if side == 0:
+						self.enemies.append(Enemy(random.randint(0, screen_width), -self.enemySize, self.enemyImage, self.normalSpeed, self.normalHealth))
+					else:
+						self.enemies.append(Enemy(random.randint(0, screen_width), side, self.enemyImage, self.normalSpeed, self.normalHealth))
 			self.spawnTime *= 0.99
 			self.spawnTimer = 0
 				
@@ -865,7 +904,8 @@ def Corona():
 
 	#Spawner and enemy variables
 	enemyImg = pygame.image.load(f"{imageMap}\\corona.png").convert_alpha()
-	spawner = Spawner(enemyImg)
+	bossImage = pygame.image.load(f"{imageMap}\\coronaBoss.png").convert_alpha()
+	spawner = Spawner(enemyImg, bossImage)
 
 
 	#Sound variables
@@ -940,15 +980,18 @@ def Corona():
 		for i in range(len(spawner.enemies)-1, -1, -1):
 			for j in range(len(player.bullets)-1, -1, -1):
 				hit = collisionCheck(player.bullets[j], spawner.enemies[i])
+				#Vi träffade en fiende
 				if hit:
-					player.Kills += 1
-					PowUpChance = random.random()
-					if PowUpChance <= player.powerUpChance:
-						player.secPerShot *= 0.99
-					KillsText = KillsFont.render(f"Kills: {player.Kills}", False, (255,0,0))
-					spawner.enemies.pop(i)
+					spawner.enemies[i].Hit()
 					player.bullets.pop(j)
-					break
+					if spawner.enemies[i].hp <= 0:
+						player.Kills += 1
+						PowUpChance = random.random()
+						if PowUpChance <= player.powerUpChance:
+							player.secPerShot *= 0.99
+						KillsText = KillsFont.render(f"Kills: {player.Kills}", False, (255,0,0))
+						spawner.enemies.pop(i)
+						break
 
 		#Check if enemy hit player
 		for i in range(len(spawner.enemies)-1, -1, -1):
@@ -1064,6 +1107,8 @@ def Instruktion():
 		pass
 
 
+#Lagra lösenorder för återställning
+passWord = ReadPassword()
 
 #Här börjar applikationen
 while True:
@@ -1085,7 +1130,7 @@ while True:
 	elif svar == "2":
 		LeaderBoard()
 	elif svar == "3":
-		ResetLeaderBoardOptions()
+		ResetLeaderBoardOptions(passWord)
 	elif svar == "4":
 		Instruktion()
 	elif svar == "5":
