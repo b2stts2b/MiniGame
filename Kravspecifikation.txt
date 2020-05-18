@@ -35,5 +35,4 @@ Kravspecifikation:
 	- Spawna fiender random runt planen.
 	- Chans för kortare tid mellan skott vid kill.
 	- Olika mycket HP på virus!!!
-      5. Statistik? (MatPlotLib)
-	- Statistik (Matplotlib?)
+      5. SPELET ÄR KLART!! Det blev en exe-fil också!

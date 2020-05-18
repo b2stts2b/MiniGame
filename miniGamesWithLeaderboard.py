@@ -5,10 +5,13 @@ import pygame
 from time import time
 from math import sqrt
 
+CurrentPath = os.getcwd()
+
+#Filer och filmappar (Ser olika ut då jag försökte debugga ett fel med ljudet när jag skulle göra en exe-fil.)
+soundMap = os.path.join(CurrentPath, 'Sounds')
 filMapp = os.getcwd()
 textMap = f"{filMapp}\\Textfiler"
 imageMap = f"{filMapp}\\Images"
-soundMap = f"{filMapp}\\Sounds"
 filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardToiletPaper.txt", "leaderBoardCorona.txt"]
 passWord = ""
 
@@ -34,7 +37,7 @@ def resetLeaderBoard(highIsGood, filePath):
 			else:
 				f.write(f"{highScore[i]}\n")
 
-#Nollställer topplistan
+#Nollställer topplistan meny
 def ResetLeaderBoardOptions(passWord):
 	svar = input("Lösenord: ")
 	if svar == passWord:
@@ -150,20 +153,24 @@ def LeaderBoards(game, filePath):
 def GissaTal():
 	os.system("cls")
 
+	#Spelvariabler
 	lowestPossible = 1
 	highestPossible = 1000000
 	rättTal = random.randint(lowestPossible,highestPossible)
 
+	#Vinna/Score-variabler
 	rättSvar = False
 	antalGissningar = 0
 	highScore = readLeaderBoard(filePaths[0])
 
+	#Medan vi har felsvar, Fråga om svar
 	while not rättSvar:
 		print(f"Jag tänker på ett tal mellan {lowestPossible} och {highestPossible}")
 		try:
 			svar = int(input("Gissa talet: "))
 			antalGissningar += 1
 			if svar == rättTal:
+				#Du har gissat rätt!
 				os.system("cls")
 				print(f"Du svarade rätt! Jag tänkte på talet {rättTal}")
 				print(f"Det tog dig {antalGissningar} försök.")
@@ -190,8 +197,6 @@ def GissaTal():
 
 #SpaceInvaders spelet 
 def SpaceInvaders():
-	import pygame, random, sys, os
-	from time import time
 
 	class Bullet:
 		def __init__(self, x, y, img):
@@ -245,6 +250,7 @@ def SpaceInvaders():
 			elif index == 2:
 				self.secPerShot *= 0.95
 
+
 	class Pow:
 		def __init__(self, center, images):
 			possibilities = []
@@ -264,6 +270,7 @@ def SpaceInvaders():
 
 		def isOverTop(self):
 			return (self.rect.y > screen_height)
+
 
 	class Game:
 		def __init__(self):
@@ -377,13 +384,13 @@ def SpaceInvaders():
 	bg_image = pygame.transform.scale(image, (screen_width, screen_height)) 
 
 	#variabler för text 
-	levelFont = pygame.font.Font("freesansbold.ttf", 115)
+	levelFont = pygame.font.SysFont("couriernew", 100)
 	scoreFont = pygame.font.SysFont("arial", 40)
 	scoreText = scoreFont.render(f"Score: {game.antalPoäng}", False, (255,0,0))
 	score_rect = scoreText.get_rect()
 
 	#Variabler för ljud
-	skjut_ljud = pygame.mixer.Sound(f"{soundMap}\\skjuta.wav")
+	skjut_ljud = pygame.mixer.Sound(os.path.join(soundMap, "skjuta.wav"))
 	skjut_ljud.set_volume(0.2)
 
 
@@ -475,7 +482,7 @@ def SpaceInvaders():
 				player.getPowerUp(powerUps[i].index)
 				powerUps.pop(i)
 
-
+		#Rita allt på skärmen
 		screen.blit(player.img, player.rect)
 		screen.blit(scoreText, score_rect)
 		for heart in range(0,player.health):
@@ -504,6 +511,8 @@ def SpaceInvaders():
 
 #Toapapper spelet
 def ToiletPaper():
+	
+
 	class Hink:
 		def __init__(self, x, y, img):
 			self.img = img
@@ -528,6 +537,7 @@ def ToiletPaper():
 					return True
 			return False
 
+
 	class Rulle:
 		def __init__(self, x, img, speed):
 			self.img = img
@@ -545,6 +555,7 @@ def ToiletPaper():
 		def isOnBottom(self):
 			return (self.rect.bottom > screen_height)
 
+
 	class Game:
 		def __init__(self):
 			self.poäng = 0
@@ -561,15 +572,12 @@ def ToiletPaper():
 			self.timer = 0
 			self.resetTime *= 0.992
 
-
-
 	pygame.init()
-
 	#Skärmen
 	screen_width = 500
 	screen_height = 600
 	screen = pygame.display.set_mode((screen_width, screen_height), depth = 32)
-
+	pygame.display.set_caption("ToiletPaper")
 	#Position i x-led
 	inc = screen_width//16
 	pos = [3*inc, 8*inc, 13*inc]
@@ -662,6 +670,7 @@ def ToiletPaper():
 
 #CoronaRymden
 def Corona():
+
 	#Player Class
 	class Player:
 		#Initialize player
@@ -811,7 +820,7 @@ def Corona():
 			self.bossSpeed = 2
 			self.bossHealth = 2
 			self.normalHealth = 1
-			self.normalChance = 0.95
+			self.normalChance = 0.9
 
 			self.spawnTime = 1.5
 			self.spawnTimer = 0
@@ -888,6 +897,7 @@ def Corona():
 	bgImage = pygame.image.load(f"{imageMap}\\bgImage2.jpg").convert()
 	bgImage = pygame.transform.scale(bgImage, (screen_width, screen_height))
 	bgImage2 = pygame.transform.flip(bgImage, True, False)
+	pygame.display.set_caption("Corona")
 
 	#Player variables
 	playerImg = pygame.image.load(f"{imageMap}\\ufoGreen.png").convert_alpha()
@@ -909,7 +919,7 @@ def Corona():
 
 
 	#Sound variables
-	musicFile = pygame.mixer.music.load(f"{soundMap}\\interstellar.mp3")
+	musicFile = pygame.mixer.music.load(f"{soundMap}\\interstellar.wav")
 	pygame.mixer.music.play(loops = -1)
 
 	#Variables for texts
@@ -1024,6 +1034,7 @@ def Corona():
 		print("Du kom inte på topplistan.")
 	input("Enter...")
 
+#Spelameny
 def Spela():
 	svar = ""
 	while svar not in ["1","2","3","4","5"]:
@@ -1047,6 +1058,7 @@ def Spela():
 	else:
 		pass
 
+#Leaderboardmeny
 def LeaderBoard():
 	svar = ""
 	while svar not in ["1","2","3","4", "5"]:
@@ -1074,6 +1086,7 @@ def LeaderBoard():
 	elif svar == "5":
 		pass
 
+#Instruktionmeny
 def Instruktion():
 	svar = ""
 	while svar not in ["1","2","3","4", "5"]:
