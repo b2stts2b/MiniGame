@@ -5,22 +5,25 @@ import pygame
 from time import time
 from math import sqrt
 
+
 CurrentPath = os.getcwd()
 
 #Filer och filmappar (Ser olika ut då jag försökte debugga ett fel med ljudet när jag skulle göra en exe-fil.)
-soundMap = os.path.join(CurrentPath, 'Sounds')
-filMapp = os.getcwd()
-textMap = f"{filMapp}\\Textfiler"
-imageMap = f"{filMapp}\\Images"
-filePaths = ["leaderBoardGissaTal.txt", "leaderBoardSpaceInvaders.txt", "leaderBoardToiletPaper.txt", "leaderBoardCorona.txt"]
+soundMap = os.path.join(CurrentPath, "Sounds")
+textMap = os.path.join(CurrentPath, "Textfiler")
+imageMap = os.path.join(CurrentPath, "Images")
+filePaths = ["leaderBoardGissaTal.txt", 
+			"leaderBoardSpaceInvaders.txt", 
+			"leaderBoardToiletPaper.txt", 
+			"leaderBoardCorona.txt"]
 passWord = ""
 
 
 #Läs in lösenord för återställning
 def ReadPassword():
 	pWord = ""
-	with open(f"{textMap}\\password.txt") as f:
-		pWord = f.read().replace(" ", "").replace("lösenord:", "")
+	with open(os.path.join(textMap, "password.txt")) as f:
+		pWord = f.read().strip().replace(" ", "").replace("password:", "")
 	return pWord
 
 #Nollställer topplistan
@@ -30,12 +33,16 @@ def resetLeaderBoard(highIsGood, filePath):
 		highScore = ["AAA,0","BBB,0","CCC,0","DDD,0","EEE,0","FFF,0","GGG,0","HHH,0","III,0","JJJ,0"]
 	else:
 		highScore = ["AAA,999","BBB,999","CCC,999","DDD,999","EEE,999","FFF,999","GGG,999","HHH,999","III,999","JJJ,999"]
-	with open(f"{textMap}\\{filePath}", "w") as f:
+	with open(os.path.join(textMap, filePath), "w") as f:
 		for i in range(len(highScore)):
 			if i == len(highScore)-1:
 				f.write(f"{highScore[i]}")
 			else:
 				f.write(f"{highScore[i]}\n")
+
+# Clear the terminal from any text
+def clear_screen():
+	os.system("cls" if os.name == "nt" else "clear")
 
 #Nollställer topplistan meny
 def ResetLeaderBoardOptions(passWord):
@@ -43,7 +50,7 @@ def ResetLeaderBoardOptions(passWord):
 	if svar == passWord:
 		svar = ""
 		while svar not in ["1","2","3","4","5"]:
-			os.system("cls")
+			clear_screen()
 			print("Vilket spels topplista ska ställas om?")
 			print("1. Gissa tal.")
 			print("2. Space Invaders.")
@@ -77,7 +84,7 @@ def printLeaderBoard(scores):
 #Läser av en textfil och ger tillbaka en lista av highscore
 def readLeaderBoard(filePath):
 	highScore = []
-	with open(f"{textMap}\\{filePath}") as f:
+	with open(os.path.join(textMap, filePath)) as f:
 		data = f.read()
 		spelare = data.split("\n")
 		for spel in spelare:
@@ -86,7 +93,7 @@ def readLeaderBoard(filePath):
 		
 #Updaterar textfilen med nya highscore	
 def uploadLeaderBoard(scores, filePath):
-	with open(f"{textMap}\\{filePath}", "w") as f:
+	with open(os.path.join(textMap, filePath), "w") as f:
 		for i in range(len(scores)):
 			if i == len(scores)-1:
 				f.write(f"{scores[i]}")
@@ -142,7 +149,7 @@ def updateHighScore(scores, name, number, highIsGood):
 
 #Skriv ut topplistan på skärmen
 def LeaderBoards(game, filePath):
-	os.system("cls")
+	clear_screen()
 	print(f"LeaderBoard {game}")
 	print("*************************")
 	highScore = readLeaderBoard(filePath)
@@ -151,7 +158,7 @@ def LeaderBoards(game, filePath):
 
 #GissaTal spelet (inte särskrivning)
 def GissaTal():
-	os.system("cls")
+	clear_screen()
 
 	#Spelvariabler
 	lowestPossible = 1
@@ -171,7 +178,7 @@ def GissaTal():
 			antalGissningar += 1
 			if svar == rättTal:
 				#Du har gissat rätt!
-				os.system("cls")
+				clear_screen()
 				print(f"Du svarade rätt! Jag tänkte på talet {rättTal}")
 				print(f"Det tog dig {antalGissningar} försök.")
 				if isHighScore(highScore, antalGissningar, False):
@@ -344,8 +351,8 @@ def SpaceInvaders():
 	pygame.display.set_caption("Space Invaders")
 
 	#Spelarens information
-	image = pygame.image.load(f"{imageMap}\\PlayerShip.png").convert_alpha()
-	heart_image = pygame.image.load(f"{imageMap}\\heart.png").convert_alpha()
+	image = pygame.image.load(os.path.join(imageMap, "PlayerShip.png")).convert_alpha()
+	heart_image = pygame.image.load(os.path.join(imageMap, "heart.png")).convert_alpha()
 	heart_image = pygame.transform.scale(heart_image, (40,40))
 	heart_rect = heart_image.get_rect()
 	heart_rect.right = screen_width
@@ -356,22 +363,22 @@ def SpaceInvaders():
 	player = Player(screen_width//2, screen_height - player_image.get_rect().height - 10, player_image)
 
 	#Skottens information
-	image = pygame.image.load(f"{imageMap}\\bullet2.png").convert_alpha()
+	image = pygame.image.load(os.path.join(imageMap, "bullet2.png")).convert_alpha()
 	bullet_image = image.copy()
 	bullet_pos = bullet_image.get_rect()
 	bullets = []
 
 	#PowerUp Information
-	health_image = pygame.image.load(f"{imageMap}\\health.png").convert_alpha()
-	speed_image = pygame.image.load(f"{imageMap}\\speed.png").convert_alpha()
-	moveSpeed_image = pygame.image.load(f"{imageMap}\\moveSpeed.png").convert_alpha()
+	health_image = pygame.image.load(os.path.join(imageMap, "health.png")).convert_alpha()
+	speed_image = pygame.image.load(os.path.join(imageMap, "speed.png")).convert_alpha()
+	moveSpeed_image = pygame.image.load(os.path.join(imageMap, "moveSpeed.png")).convert_alpha()
 	powerUpImages = [health_image, moveSpeed_image, speed_image]
 	chanceToSpawn = 0.1
 	powerUps = []
 
 
 	#Fiendens information
-	image = pygame.image.load(f"{imageMap}\\enemyBlue1.png").convert_alpha()
+	image = pygame.image.load(os.path.join(imageMap, "enemyBlue1.png")).convert_alpha()
 	rez = image.get_rect().width/image.get_rect().height
 	h = 50
 	w = round(h*rez)
@@ -380,7 +387,7 @@ def SpaceInvaders():
 	enemies = []
 
 	#Bakgrundens information
-	image = pygame.image.load(f"{imageMap}\\bgImage.jpg").convert()
+	image = pygame.image.load(os.path.join(imageMap, "bgImage.jpg")).convert()
 	bg_image = pygame.transform.scale(image, (screen_width, screen_height)) 
 
 	#variabler för text 
@@ -588,14 +595,14 @@ def ToiletPaper():
 	#Spelaren
 	w = 100
 	h = 100
-	bucket_image = pygame.image.load(f"{imageMap}\\bucket.png").convert_alpha()
+	bucket_image = pygame.image.load(os.path.join(imageMap, "bucket.png")).convert_alpha()
 	bucket_image = pygame.transform.scale(bucket_image, (w, h))
 	hink = Hink(screen_width//2, screen_height - h - 10, bucket_image)
 	hink.rect.centerx = pos[hink.index]
 
 	#Rullarna
 	w, h = 60, 60
-	rulle_image = pygame.image.load(f"{imageMap}\\rulle.png").convert_alpha()
+	rulle_image = pygame.image.load(os.path.join(imageMap, "rulle.png")).convert_alpha()
 	rulle_image = pygame.transform.scale(rulle_image, (w, h))
 	rullar = []
 
@@ -605,7 +612,7 @@ def ToiletPaper():
 	highScore = readLeaderBoard(filePaths[2])
 
 	#Bakgrundens information
-	paperBgImage = pygame.image.load(f"{imageMap}\\emptyToiletPaper.png").convert()
+	paperBgImage = pygame.image.load(os.path.join(imageMap, "emptyToiletPaper.png")).convert()
 	paperBgImage = pygame.transform.scale(paperBgImage, (screen_width, screen_height)) 
 
 	#Textvariabler
@@ -894,13 +901,13 @@ def Corona():
 	screen_width = 700
 	screen_height = 700
 	Screen = pygame.display.set_mode((screen_width, screen_height))
-	bgImage = pygame.image.load(f"{imageMap}\\bgImage2.jpg").convert()
+	bgImage = pygame.image.load(os.path.join(imageMap, "bgImage2.jpg")).convert()
 	bgImage = pygame.transform.scale(bgImage, (screen_width, screen_height))
 	bgImage2 = pygame.transform.flip(bgImage, True, False)
 	pygame.display.set_caption("Corona")
 
 	#Player variables
-	playerImg = pygame.image.load(f"{imageMap}\\ufoGreen.png").convert_alpha()
+	playerImg = pygame.image.load(os.path.join(imageMap, "ufoGreen.png")).convert_alpha()
 	rez = playerImg.get_rect().width/playerImg.get_rect().height
 	h = 50
 	w = round(h*rez)
@@ -908,18 +915,18 @@ def Corona():
 	player = Player(screen_width//2, screen_height//2, playerImg)
 
 	#Bullets variables
-	bulletImg = pygame.image.load(f"{imageMap}\\mineBullet.png").convert_alpha()
+	bulletImg = pygame.image.load(os.path.join(imageMap, "mineBullet.png")).convert_alpha()
 	bulletImg = pygame.transform.scale(bulletImg, (15, 15))
 	frameRate = 50
 
 	#Spawner and enemy variables
-	enemyImg = pygame.image.load(f"{imageMap}\\corona.png").convert_alpha()
-	bossImage = pygame.image.load(f"{imageMap}\\coronaBoss.png").convert_alpha()
+	enemyImg = pygame.image.load(os.path.join(imageMap, "corona.png")).convert_alpha()
+	bossImage = pygame.image.load(os.path.join(imageMap, "coronaBoss.png")).convert_alpha()
 	spawner = Spawner(enemyImg, bossImage)
 
 
 	#Sound variables
-	musicFile = pygame.mixer.music.load(f"{soundMap}\\interstellar.wav")
+	musicFile = pygame.mixer.music.load(os.path.join(soundMap, "interstellar.wav"))
 	pygame.mixer.music.play(loops = -1)
 
 	#Variables for texts
@@ -1038,7 +1045,7 @@ def Corona():
 def Spela():
 	svar = ""
 	while svar not in ["1","2","3","4","5"]:
-		os.system("cls")
+		clear_screen()
 		print("Vilket spel vill du spela?")
 		print("1. Gissa tal.")
 		print("2. Space Invaders.")
@@ -1062,7 +1069,7 @@ def Spela():
 def LeaderBoard():
 	svar = ""
 	while svar not in ["1","2","3","4", "5"]:
-		os.system("cls")
+		clear_screen()
 		print("Vilket spel vill du se Highscore från?")
 		print("1. Gissa Tal.")
 		print("2. SpaceInvaders.")
@@ -1090,7 +1097,7 @@ def LeaderBoard():
 def Instruktion():
 	svar = ""
 	while svar not in ["1","2","3","4", "5"]:
-		os.system("cls")
+		clear_screen()
 		print("Vilket spel vill du lära dig?")
 		print("1. Gissa Tal."), 
 		print("2. SpaceInvaders.")
@@ -1099,21 +1106,21 @@ def Instruktion():
 		print("5. Tillbaka.")
 		svar = input("Svar: ")
 
-	os.system("cls")
+	clear_screen()
 	if svar == "1":
-		with open(f"{textMap}\\InstruktionGissaTal.txt") as f:
+		with open(os.path.join(textMap, "InstruktionGissaTal.txt")) as f:
 			print(f.read())
 		input("Enter...")
 	elif svar == "2":
-		with open(f"{textMap}\\InstruktionSpaceInvaders.txt") as f:
+		with open(os.path.join(textMap, "InstruktionSpaceInvaders.txt")) as f:
 			print(f.read())
 		input("Enter...")
 	elif svar == "3":
-		with open(f"{textMap}\\InstruktionToiletPaper.txt") as f:
+		with open(os.path.join(textMap, "InstruktionToiletPaper.txt")) as f:
 			print(f.read())
 		input("Enter...")
 	elif svar == "4":
-		with open(f"{textMap}\\InstruktionCorona.txt") as f:
+		with open(os.path.join(textMap, "InstruktionCorona.txt")) as f:
 			print(f.read())
 		input("Enter...")
 	elif svar == "5":
@@ -1128,7 +1135,7 @@ while True:
 	svar = ""
 	#Fråga efter vad spelaren vill göra
 	while svar not in ["1","2","3","4","5"]:
-		os.system("cls")
+		clear_screen()
 		print("Vad vill du göra?")
 		print("1. Spela.")
 		print("2. Kolla LeaderBoard.")
