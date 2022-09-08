@@ -518,7 +518,6 @@ def SpaceInvaders():
 
 #Toapapper spelet
 def ToiletPaper():
-	
 
 	class Hink:
 		def __init__(self, x, y, img):
@@ -589,9 +588,6 @@ def ToiletPaper():
 	inc = screen_width//16
 	pos = [3*inc, 8*inc, 13*inc]
 
-	#Key för pilarna
-	ARROWS = [276, 275]
-
 	#Spelaren
 	w = 100
 	h = 100
@@ -625,10 +621,10 @@ def ToiletPaper():
 			if event.type == pygame.QUIT:
 				run = False
 			if event.type == pygame.KEYDOWN:
-				if event.key == ARROWS[0]:
+				if event.key == ord("a") or event.key == pygame.K_LEFT:
 					hink.index -= 1
 					hink.updatePos()
-				elif event.key == ARROWS[1]:
+				elif event.key == ord("d") or event.key == pygame.K_RIGHT:
 					hink.index += 1
 					hink.updatePos()
 		
@@ -1125,7 +1121,6 @@ def Instruktion():
 		input("Enter...")
 	elif svar == "5":
 		pass
-
 
 #Lagra lösenorder för återställning
 passWord = ReadPassword()
